@@ -70,3 +70,42 @@ jobs:
             FileAssignmentManager-dist.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # main/master에 올 때마다 같은 태그(rolling-latest) 릴리스를 갱신해
+  # README의 /releases/download/rolling-latest/... 링크가 항상 동작하게 함
+  rolling-release:
+    name: Update rolling-latest release (main)
+    needs: build
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      contents: write
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: FileAssignmentManager-dist
+          path: release-dist
+
+      - name: Zip dist for one-file download
+        run: |
+          cd release-dist
+          zip -r "$GITHUB_WORKSPACE/FileAssignmentManager-dist.zip" .
+
+      - name: Create or update rolling-latest release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: rolling-latest
+          name: Latest build (main)
+          commit: ${{ github.sha }}
+          artifacts: "release-dist/FileAssignmentManager.exe,FileAssignmentManager-dist.zip"
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: false
+          body: |
+            `main` / `master` 브랜치에서 자동 빌드한 파일입니다. **고정 다운로드 URL**은 README의 바로 가기 표를 참고하세요.
+
+            정식 버전은 `v*` 태그 릴리스를 확인하세요.
+          token: ${{ secrets.GITHUB_TOKEN }}

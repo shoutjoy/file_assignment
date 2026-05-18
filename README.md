@@ -118,12 +118,13 @@ Windows용 도구입니다. **주차별·학생별로 나뉜 과제 폴더** 안
 
 | 받는 방법 | 링크 |
 | --- | --- |
-| **릴리스 최신본** (태그가 올라온 뒤 exe·dist ZIP) | [github.com/shoutjoy/file_assignment/releases/latest](https://github.com/shoutjoy/file_assignment/releases/latest) |
-| **릴리스에서 EXE만** (파일명 고정, latest) | [`FileAssignmentManager.exe` 다운로드](https://github.com/shoutjoy/file_assignment/releases/latest/download/FileAssignmentManager.exe) |
-| **릴리스에서 dist 폴더 ZIP** (통째로 받기, latest) | [`FileAssignmentManager-dist.zip` 다운로드](https://github.com/shoutjoy/file_assignment/releases/latest/download/FileAssignmentManager-dist.zip) |
-| **Actions 빌드 목록** (매 푸시마다 생성되는 Artifact) | [Build Windows EXE 워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml) |
+| **main 자동 빌드** (`rolling-latest`, 파일명 고정·항상 같은 주소) | [이 릴리스 페이지](https://github.com/shoutjoy/file_assignment/releases/tag/rolling-latest) |
+| **EXE 직접 다운로드** | [`FileAssignmentManager.exe`](https://github.com/shoutjoy/file_assignment/releases/download/rolling-latest/FileAssignmentManager.exe) |
+| **dist ZIP** (폴더 통째) | [`FileAssignmentManager-dist.zip`](https://github.com/shoutjoy/file_assignment/releases/download/rolling-latest/FileAssignmentManager-dist.zip) |
+| **릴리스 목록** (`v*` 정식 버전 등) | [Releases](https://github.com/shoutjoy/file_assignment/releases) |
+| **Actions** (Artifact·실행 기록) | [Build Windows EXE 워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml) |
 
-> `releases/latest/download/...` 주소는 **GitHub에 릴리스와 해당 파일이 올라가 있어야** 열립니다. 아직 릴리스가 없으면 아래 **방법 2**로 Actions **Artifacts**에서 받으세요.
+> 위 **고정 링크**는 **`main` 또는 `master`에 푸시될 때마다** Actions가 `rolling-latest` 릴리스를 갱신한 뒤에 열립니다. 저장소에 이 워크플로가 반영된 뒤 **한 번 이상** 해당 브랜치에서 빌드가 성공해야 합니다. 아직 404이면 [워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml)에서 최근 실행이 초록색인지 확인하세요.
 
 ### 방법 1 — GitHub에서 저장소 받기 (소스 + 직접 실행)
 
@@ -145,7 +146,7 @@ Windows용 도구입니다. **주차별·학생별로 나뉜 과제 폴더** 안
 3. 페이지 하단 **Artifacts** 에서 **`FileAssignmentManager-dist`** 를 내려받습니다 (ZIP).
 4. ZIP을 풀면 **빌드 결과물(`dist`와 동일한 구성)** 이 들어 있습니다. 보통 **`FileAssignmentManager.exe`** 한 개이며, PyInstaller가 다른 파일을 두면 함께 포함됩니다.
 
-**릴리스에서 받기:** `v1.0.0` 같이 **`v`로 시작하는 태그**를 push하면, 워크플로가 **`FileAssignmentManager.exe`** 와 **`FileAssignmentManager-dist.zip`**(dist 통째)을 **Releases**에 올립니다. [Releases](https://github.com/shoutjoy/file_assignment/releases) 의 **Assets** 또는 위 표의 **바로 가기** 링크를 이용하세요.
+**고정 URL로 받기:** 위 표의 **`rolling-latest`** 링크는 main 빌드 결과를 같은 파일 이름으로 덮어써 줍니다. **`v1.0.0`** 같이 **`v`로 시작하는 태그**를 push하면 해당 버전 릴리스에도 exe·ZIP이 **추가로** 붙습니다. [Releases](https://github.com/shoutjoy/file_assignment/releases) 의 **Assets**에서 고르세요.
 
 ### 방법 3 — EXE만 쓰고 싶을 때 (`dist`가 저장소에 있을 때)
 
