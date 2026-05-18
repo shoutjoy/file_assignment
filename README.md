@@ -114,6 +114,17 @@ Windows용 도구입니다. **주차별·학생별로 나뉜 과제 폴더** 안
 
 ## 다운로드 방법
 
+### 바로 가기 (링크)
+
+| 받는 방법 | 링크 |
+| --- | --- |
+| **릴리스 최신본** (태그가 올라온 뒤 exe·dist ZIP) | [github.com/shoutjoy/file_assignment/releases/latest](https://github.com/shoutjoy/file_assignment/releases/latest) |
+| **릴리스에서 EXE만** (파일명 고정, latest) | [`FileAssignmentManager.exe` 다운로드](https://github.com/shoutjoy/file_assignment/releases/latest/download/FileAssignmentManager.exe) |
+| **릴리스에서 dist 폴더 ZIP** (통째로 받기, latest) | [`FileAssignmentManager-dist.zip` 다운로드](https://github.com/shoutjoy/file_assignment/releases/latest/download/FileAssignmentManager-dist.zip) |
+| **Actions 빌드 목록** (매 푸시마다 생성되는 Artifact) | [Build Windows EXE 워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml) |
+
+> `releases/latest/download/...` 주소는 **GitHub에 릴리스와 해당 파일이 올라가 있어야** 열립니다. 아직 릴리스가 없으면 아래 **방법 2**로 Actions **Artifacts**에서 받으세요.
+
 ### 방법 1 — GitHub에서 저장소 받기 (소스 + 직접 실행)
 
 1. 브라우저에서 [https://github.com/shoutjoy/file_assignment](https://github.com/shoutjoy/file_assignment) 를 엽니다.  
@@ -125,16 +136,27 @@ Windows용 도구입니다. **주차별·학생별로 나뉜 과제 폴더** 안
 
 3. 압축을 풀거나 clone한 폴더가 `File_assignment_manager`(또는 `file_assignment`) 입니다.
 
-### 방법 2 — EXE만 쓰고 싶을 때
+### 방법 2 — GitHub Actions에서 받기 (권장)
+
+저장소에 **GitHub Actions** 워크플로(`Build Windows EXE`)가 있으면, **main/master에 푸시될 때마다** `dist` 폴더 내용이 빌드되어 **Artifacts**로 올라갑니다. Python 설치 없이 최신 빌드를 받을 때 편합니다.
+
+1. 위 표의 **[Build Windows EXE 워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml)** 링크로 이동하거나, 저장소 **Actions** 탭에서 같은 워크플로를 엽니다.
+2. **초록 체크가 있는 최근 실행**을 클릭합니다.
+3. 페이지 하단 **Artifacts** 에서 **`FileAssignmentManager-dist`** 를 내려받습니다 (ZIP).
+4. ZIP을 풀면 **빌드 결과물(`dist`와 동일한 구성)** 이 들어 있습니다. 보통 **`FileAssignmentManager.exe`** 한 개이며, PyInstaller가 다른 파일을 두면 함께 포함됩니다.
+
+**릴리스에서 받기:** `v1.0.0` 같이 **`v`로 시작하는 태그**를 push하면, 워크플로가 **`FileAssignmentManager.exe`** 와 **`FileAssignmentManager-dist.zip`**(dist 통째)을 **Releases**에 올립니다. [Releases](https://github.com/shoutjoy/file_assignment/releases) 의 **Assets** 또는 위 표의 **바로 가기** 링크를 이용하세요.
+
+### 방법 3 — EXE만 쓰고 싶을 때 (`dist`가 저장소에 있을 때)
 
 EXE는 저장소에 **`dist` 폴더**로 올려 두는 경우가 있습니다(관리자가 빌드·커밋한 뒤).
 
 1. GitHub에서 **`dist`** 폴더로 이동  
 2. **`FileAssignmentManager.exe`** 클릭 → **Download raw file** (또는 **⋯ → Download**)
 
-`dist`가 없으면 아래 **「EXE 직접 빌드」** 또는 **py2App** 등으로 `FileAssignmentManager.spec` 을 빌드해 `dist\FileAssignmentManager.exe` 를 만듭니다.
+`dist`가 없으면 **방법 2**(Actions)·**방법 4**(로컬 빌드)를 이용하거나, `FileAssignmentManager.spec` 으로 PyInstaller 빌드로 `dist\FileAssignmentManager.exe` 를 만듭니다.
 
-### 방법 3 — 로컬에서 EXE 빌드
+### 방법 4 — 로컬에서 EXE 빌드
 
 저장소를 받은 뒤, **Windows**에서 Python 3.9+ 와 `build_exe.cmd` 가 있는 폴더로 이동:
 
