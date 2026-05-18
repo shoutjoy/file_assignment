@@ -118,13 +118,14 @@ Windows용 도구입니다. **주차별·학생별로 나뉜 과제 폴더** 안
 
 | 받는 방법 | 링크 |
 | --- | --- |
-| **main 자동 빌드** (`rolling-latest`, 파일명 고정·항상 같은 주소) | [이 릴리스 페이지](https://github.com/shoutjoy/file_assignment/releases/tag/rolling-latest) |
-| **EXE 직접 다운로드** | [`FileAssignmentManager.exe`](https://github.com/shoutjoy/file_assignment/releases/download/rolling-latest/FileAssignmentManager.exe) |
-| **dist ZIP** (폴더 통째) | [`FileAssignmentManager-dist.zip`](https://github.com/shoutjoy/file_assignment/releases/download/rolling-latest/FileAssignmentManager-dist.zip) |
+| **dist 직접 다운로드** (Actions가 올린 **`dist` 폴더**와 동일 내용·ZIP) | [`FileAssignmentManager-dist.zip`](https://github.com/shoutjoy/file_assignment/releases/download/rolling-latest/FileAssignmentManager-dist.zip) |
+| **EXE만** (위 dist ZIP과 **같은 빌드**, 단일 파일) | [`FileAssignmentManager.exe`](https://github.com/shoutjoy/file_assignment/releases/download/rolling-latest/FileAssignmentManager.exe) |
+| **main 자동 빌드** (`rolling-latest` 릴리스 페이지) | [rolling-latest 릴리스](https://github.com/shoutjoy/file_assignment/releases/tag/rolling-latest) |
 | **릴리스 목록** (`v*` 정식 버전 등) | [Releases](https://github.com/shoutjoy/file_assignment/releases) |
-| **Actions** (Artifact·실행 기록) | [Build Windows EXE 워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml) |
+| **Actions** (실행별 Artifact `FileAssignmentManager-dist`) | [Build Windows EXE 워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml) |
 
-> 위 **고정 링크**는 **`main` 또는 `master`에 푸시될 때마다** Actions가 `rolling-latest` 릴리스를 갱신한 뒤에 열립니다. 저장소에 이 워크플로가 반영된 뒤 **한 번 이상** 해당 브랜치에서 빌드가 성공해야 합니다. 아직 404이면 [워크플로](https://github.com/shoutjoy/file_assignment/actions/workflows/build-windows-exe.yml)에서 최근 실행이 초록색인지 확인하세요.
+> **ZIP**은 워크플로에서 **`dist` 전체**를 묶은 것과 같습니다. 압축을 풀면 `FileAssignmentManager.exe` 가 있습니다.  
+> 고정 URL(`rolling-latest`)은 **`main` / `master`에 푸시** 후 Actions가 끝나야 열립니다. **Actions만** 쓸 때는 워크플로 실행 페이지 하단 **Artifacts → `FileAssignmentManager-dist`** 로 받으세요(GitHub는 실행마다 바뀌는 Artifact에 **영구 직접 URL**을 주지 않습니다).
 
 ### 방법 1 — GitHub에서 저장소 받기 (소스 + 직접 실행)
 
