@@ -437,6 +437,15 @@ class AssignmentManagerApp:
         self.root.update_idletasks()
 
     def parse_student_info(self, folder_name):
+        if folder_name.rstrip("_").endswith("_assignsubmission_onlinetext"):
+            return None, None
+
+        match = re.match(r"^(.+?)_([0-9]+)_assignsubmission_file_?$", folder_name)
+        if match:
+            name = match.group(1).strip()
+            student_id = match.group(2).strip()
+            return name, student_id
+
         match = re.match(r"^([^-]+)-([0-9]+)", folder_name)
         if match:
             name = match.group(1).strip()
@@ -724,7 +733,10 @@ class AssignmentManagerApp:
                                 )
                                 copy_count += 1
                     else:
-                        self.log(f"[건너뜀] 학번 패턴 불일치 폴더: {item}")
+                        if item.rstrip("_").endswith("_assignsubmission_onlinetext"):
+                            self.log(f"[건너뜀] 온라인문서 제출 폴더 제외: {item}")
+                        else:
+                            self.log(f"[건너뜀] 학번 패턴 불일치 폴더: {item}")
 
             if self.create_csv_var.get() and student_list:
                 csv_path = os.path.join(target_dir, "학생명단_리스트.csv")

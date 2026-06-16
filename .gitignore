@@ -4,3 +4,8 @@ __pycache__/
 *.pyo
 .Python
 *.spec.bak
+push.bat
+push.py
+
+
+temp/

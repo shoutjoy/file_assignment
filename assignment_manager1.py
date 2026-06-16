@@ -156,9 +156,19 @@ class AssignmentManagerApp:
 
     def parse_student_info(self, folder_name):
         """
-        폴더 이름 구조분석 (예: 강상우-2026651101_10310027_assignment)
+        폴더 이름 구조분석 (예: 강상우-2026651101_10310027_assignment,
+        김지혜_1612293_assignsubmission_file_)
         이름과 학번을 분리하여 반환한다.
         """
+        if folder_name.rstrip("_").endswith("_assignsubmission_onlinetext"):
+            return None, None
+
+        match = re.match(r"^(.+?)_([0-9]+)_assignsubmission_file_?$", folder_name)
+        if match:
+            name = match.group(1).strip()
+            student_id = match.group(2).strip()
+            return name, student_id
+
         # 정규표현식을 통해 하이픈(-) 앞의 이름과 뒤의 학번(숫자)을 추출한다.
         match = re.match(r"^([^-]+)-([0-9]+)", folder_name)
         if match:
@@ -320,7 +330,10 @@ class AssignmentManagerApp:
                                 self.log(f"  └ 파일 복사 완료: {file} -> {os.path.basename(dest_file_path)}")
                                 copy_count += 1
                     else:
-                        self.log(f"[건너뜀] 학번 패턴 불일치 폴더: {item}")
+                        if item.rstrip("_").endswith("_assignsubmission_onlinetext"):
+                            self.log(f"[건너뜀] 온라인문서 제출 폴더 제외: {item}")
+                        else:
+                            self.log(f"[건너뜀] 학번 패턴 불일치 폴더: {item}")
 
             # CSV 파일 생성 작업
             if self.create_csv_var.get() and student_list:
