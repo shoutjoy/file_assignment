@@ -10,6 +10,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext, ttk
 import winreg as reg
 
+from gyeonggi_submission import merge_gyeonggi_submissions
+from tk_runtime import create_root
+
 
 def parse_launch_args(argv):
     """--close-after-run / --keep-open 과 폴더 경로(위치 인자)를 분리한다."""
@@ -175,6 +178,7 @@ class AssignmentManagerApp:
         self.target_dir_var = tk.StringVar()
         self.rename_files_var = tk.BooleanVar(value=True)
         self.create_csv_var = tk.BooleanVar(value=True)
+        self.format_var = tk.StringVar(value="yonsei")
 
         current_dir = app_install_dir()
         self.source_dir_var.set(current_dir)
@@ -243,7 +247,7 @@ class AssignmentManagerApp:
 
         instruction = tk.Label(
             tab_main,
-            text="학생별 폴더의 파일을 하나의 폴더로 통합하고 명단을 CSV로 추출합니다.",
+            text="과제 다운로드 형식을 선택하고 제출물을 한곳으로 통합합니다.",
             font=("Malgun Gothic", 11, "bold"),
             fg="#2c3e50",
         )
@@ -273,10 +277,23 @@ class AssignmentManagerApp:
             row=1, column=2, padx=5, pady=5
         )
 
+        format_frame = tk.LabelFrame(
+            tab_main, text="다운로드 형식", font=("Malgun Gothic", 9, "bold"), padx=10, pady=6
+        )
+        format_frame.grid(row=2, column=0, sticky="ew", padx=15, pady=5)
+        tk.Radiobutton(
+            format_frame, text="연세대 (이름-학번 폴더)",
+            variable=self.format_var, value="yonsei", font=("Malgun Gothic", 9),
+        ).pack(anchor="w")
+        tk.Radiobutton(
+            format_frame, text="경기대 (assignsubmission_file / onlinetext 폴더)",
+            variable=self.format_var, value="gyeonggi", font=("Malgun Gothic", 9),
+        ).pack(anchor="w")
+
         option_frame = tk.LabelFrame(
             tab_main, text="실행 옵션", font=("Malgun Gothic", 9, "bold"), padx=10, pady=8
         )
-        option_frame.grid(row=2, column=0, sticky="ew", padx=15, pady=5)
+        option_frame.grid(row=3, column=0, sticky="ew", padx=15, pady=5)
 
         tk.Checkbutton(
             option_frame,
@@ -649,12 +666,16 @@ class AssignmentManagerApp:
         source_dir = self.source_dir_var.get().strip()
         target_dir = self.target_dir_var.get().strip()
 
-        if not source_dir or not os.path.exists(source_dir):
+        if not source_dir or not os.path.isdir(source_dir):
             messagebox.showerror("오류", "유효한 대상 폴더 경로를 선택하십시오.")
             return
 
         if not target_dir:
             messagebox.showerror("오류", "저장할 폴더 경로를 입력하십시오.")
+            return
+
+        if os.path.normcase(os.path.abspath(source_dir)) == os.path.normcase(os.path.abspath(target_dir)):
+            messagebox.showerror("오류", "대상 폴더와 저장 폴더는 서로 달라야 합니다.")
             return
 
         if not os.path.exists(target_dir):
@@ -669,62 +690,69 @@ class AssignmentManagerApp:
         self.log("================= 과제 통합 작업을 시작합니다 =================")
         self.log(f"대상 폴더: {source_dir}")
         self.log(f"저장 폴더: {target_dir}\n")
+        self.log(f"다운로드 형식: {'경기대' if self.format_var.get() == 'gyeonggi' else '연세대'}")
 
         self.run_btn.config(state="disabled")
         student_list = []
         copy_count = 0
         folder_count = 0
+        online_count = 0
 
         try:
-            subitems = os.listdir(source_dir)
+            if self.format_var.get() == "gyeonggi":
+                student_list, folder_count, copy_count, online_count = merge_gyeonggi_submissions(
+                    source_dir, target_dir, self.rename_files_var.get(), self.log
+                )
+            else:
+                subitems = os.listdir(source_dir)
 
-            for item in subitems:
-                item_path = os.path.join(source_dir, item)
+                for item in subitems:
+                    item_path = os.path.join(source_dir, item)
 
-                if os.path.isdir(item_path) and os.path.abspath(item_path) != os.path.abspath(
-                    target_dir
-                ):
-                    name, student_id = self.parse_student_info(item)
+                    if os.path.isdir(item_path) and os.path.abspath(item_path) != os.path.abspath(
+                        target_dir
+                    ):
+                        name, student_id = self.parse_student_info(item)
 
-                    if name and student_id:
-                        folder_count += 1
-                        self.log(f"[분석 완료] 이름: {name} / 학번: {student_id} (폴더: {item})")
-                        student_list.append(
-                            {"이름": name, "학번": student_id, "기존폴더명": item}
-                        )
+                        if name and student_id:
+                            folder_count += 1
+                            self.log(f"[분석 완료] 이름: {name} / 학번: {student_id} (폴더: {item})")
+                            student_list.append(
+                                {"이름": name, "학번": student_id, "기존폴더명": item}
+                            )
 
-                        for root_dir, _, files in os.walk(item_path):
-                            for file in files:
-                                file_path = os.path.join(root_dir, file)
+                            for root_dir, _, files in os.walk(item_path):
+                                for file in files:
+                                    file_path = os.path.join(root_dir, file)
 
-                                if file.startswith("~$") or file.lower() in [
-                                    ".ds_store",
-                                    "desktop.ini",
-                                ]:
-                                    continue
+                                    if file.startswith("~$") or file.lower() in [
+                                        ".ds_store",
+                                        "desktop.ini",
+                                    ]:
+                                        continue
 
-                                if self.rename_files_var.get():
-                                    new_file_name = f"[{name}_{student_id}] {file}"
-                                else:
-                                    new_file_name = file
+                                    if self.rename_files_var.get():
+                                        new_file_name = f"[{name}_{student_id}] {file}"
+                                    else:
+                                        new_file_name = file
 
-                                dest_file_path = os.path.join(target_dir, new_file_name)
+                                    dest_file_path = os.path.join(target_dir, new_file_name)
 
-                                base, ext = os.path.splitext(new_file_name)
-                                counter = 1
-                                while os.path.exists(dest_file_path):
-                                    dest_file_path = os.path.join(
-                                        target_dir, f"{base}_{counter}{ext}"
+                                    base, ext = os.path.splitext(new_file_name)
+                                    counter = 1
+                                    while os.path.exists(dest_file_path):
+                                        dest_file_path = os.path.join(
+                                            target_dir, f"{base}_{counter}{ext}"
+                                        )
+                                        counter += 1
+
+                                    shutil.copy2(file_path, dest_file_path)
+                                    self.log(
+                                        f"  └ 파일 복사 완료: {file} -> {os.path.basename(dest_file_path)}"
                                     )
-                                    counter += 1
-
-                                shutil.copy2(file_path, dest_file_path)
-                                self.log(
-                                    f"  └ 파일 복사 완료: {file} -> {os.path.basename(dest_file_path)}"
-                                )
-                                copy_count += 1
-                    else:
-                        self.log(f"[건너뜀] 학번 패턴 불일치 폴더: {item}")
+                                    copy_count += 1
+                        else:
+                            self.log(f"[건너뜀] 학번 패턴 불일치 폴더: {item}")
 
             if self.create_csv_var.get() and student_list:
                 csv_path = os.path.join(target_dir, "학생명단_리스트.csv")
@@ -742,10 +770,14 @@ class AssignmentManagerApp:
             self.log("\n================= 작업이 완료되었습니다 =================")
             self.log(f"총 처리된 학생 폴더 수: {folder_count}개")
             self.log(f"총 통합된 파일 수: {copy_count}개")
+            if self.format_var.get() == "gyeonggi":
+                self.log(f"총 통합된 온라인 글 수: {online_count}개")
 
             messagebox.showinfo(
                 "성공",
-                f"작업이 완료되었습니다.\n통합 파일: {copy_count}개\n학생 폴더: {folder_count}개",
+                f"작업이 완료되었습니다.\n통합 파일: {copy_count}개\n"
+                f"학생 폴더: {folder_count}개"
+                + (f"\n온라인 글: {online_count}개" if self.format_var.get() == "gyeonggi" else ""),
             )
 
             if self.close_after_var.get():
@@ -763,6 +795,6 @@ class AssignmentManagerApp:
 
 if __name__ == "__main__":
     launch_mode, pos_paths = parse_launch_args(sys.argv)
-    root = tk.Tk()
+    root = create_root()
     app = AssignmentManagerApp(root, launch_mode=launch_mode, positional_paths=pos_paths)
     root.mainloop()
